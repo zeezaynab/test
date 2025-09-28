@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirdwatch | Coming Soon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .video-container video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            filter: hue-rotate(180deg) saturate(1.2);
+        }
+
+        /* Double overlay technique for stronger purple effect */
+        .color-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(140, 20, 220, 0.8);
+            z-index: -1;
+            mix-blend-mode: color;
+        }
+
+        .dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 0;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            z-index: 10;
+        }
+
+        .nav-button {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: 100;
+            letter-spacing: 4px;
+            font-size: 14px;
+            margin-left: 30px;
+            padding-bottom: 5px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: 0;
+            left: 0;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+
+        .nav-button:hover::after {
+            width: 100%;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            color: white;
+            padding: 20px;
+        }
+
+        .top-caption {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .main-headline {
+            font-size: 72px;
+            font-family: 'Lexend', sans-serif;
+            font-weight: 700;
+            letter-spacing: 8px;
+            margin: 20px 0;
+            text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .bottom-caption {
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        /* Fallback message styling */
+        .fallback-message {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+
+        /* Mobile video play button */
+        .mobile-play-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            display: none;
+        }
+
+        /* Color adjustment controls */
+        .color-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 100;
+            color: white;
+            font-size: 12px;
+        }
+
+        .color-controls h3 {
+            margin-bottom: 10px;
+        }
+
+        .slider-container {
+            margin: 8px 0;
+        }
+
+        /* Animation status display */
+        .animation-status {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #aaa;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                right: 20px;
+                top: 20px;
+            }
+            
+            .nav-button {
+                font-size: 12px;
+                letter-spacing: 3px;
+                margin-left: 20px;
+            }
+            
+            .main-headline {
+                font-size: 48px;
+                letter-spacing: 6px;
+            }
+            
+            .top-caption, .bottom-caption {
+                font-size: 14px;
+                letter-spacing: 4px;
+            }
+            
+            .color-controls {
+                display: none;
+            }
+            
+            .mobile-play-button {
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                right: 15px;
+                top: 15px;
+            }
+            
+            .nav-button {
+                font-size: 10px;
+                letter-spacing: 2px;
+                margin-left: 15px;
+            }
+            
+            .main-headline {
+                font-size: 36px;
+                letter-spacing: 4px;
+            }
+            
+            .top-caption, .bottom-caption {
+                font-size: 12px;
+                letter-spacing: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <div class="video-container">
+        <video id="background-video" autoplay muted loop playsinline>
+            <source src="video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div id="fallback-message" class="fallback-message">
+            <h2>Video Loading Issue</h2>
+            <p>If the background video doesn't load, please ensure:</p>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>The HTML file and video.mp4 are in the same folder</li>
+                <li>The video file is named "video.mp4"</li>
+                <li>You're opening the HTML file directly in your browser</li>
+            </ul>
+            <button id="try-again-btn" style="margin-top: 15px; padding: 8px 15px; background: #fff; border: none; cursor: pointer;">Try Loading Again</button>
+        </div>
+    </div>
+    
+    <!-- Double overlay for stronger purple effect -->
+    <div class="color-overlay" id="colorOverlay"></div>
+    <div class="dark-overlay"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="#" class="nav-button">Home</a>
+        <a href="#" class="nav-button">Subscribe</a>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="hero-content">
+            <div class="top-caption">Our new website is</div>
+            <div class="main-headline">Coming Soon</div>
+            <div class="bottom-caption">Stay Tuned</div>
+        </div>
+    </div>
+
+    <!-- Mobile play button -->
+    <button class="mobile-play-button" id="mobilePlayBtn">Tap to Play Video</button>
+
+    <!-- Color adjustment controls -->
+    <div class="color-controls">
+        <h3>Purple Animation Controls</h3>
+        <div class="slider-container">
+            <label>Animation Speed: <span id="speedValue">5s</span></label>
+            <input type="range" id="speedSlider" min="1" max="20" value="5">
+        </div>
+        <div class="animation-status">
+            Current Purple Intensity: <span id="currentPurple">50%</span>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="toggleAnimation()" id="toggleBtn">Pause Animation</button>
+            <button onclick="resetAnimation()" style="margin-left: 5px;">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('background-video');
+            const fallbackMessage = document.getElementById('fallback-message');
+            const tryAgainBtn = document.getElementById('try-again-btn');
+            const colorOverlay = document.getElementById('colorOverlay');
+            const speedSlider = document.getElementById('speedSlider');
+            const speedValue = document.getElementById('speedValue');
+            const currentPurple = document.getElementById('currentPurple');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const mobilePlayBtn = document.getElementById('mobilePlayBtn');
+            
+            // Animation variables
+            let animationInterval;
+            let isAnimating = true;
+            let currentIntensity = 0;
+            let increasing = true;
+            
+            // Set darkness to fixed 80%
+            document.querySelector('.dark-overlay').style.background = 'rgba(0, 0, 0, 0.6)';
+            
+            // Update purple overlay
+            function updatePurpleOverlay(intensity) {
+                colorOverlay.style.background = `rgba(140, 20, 220, ${intensity / 100})`;
+                currentPurple.textContent = `${Math.round(intensity)}%`;
+            }
+            
+            // Start the animation
+            function startAnimation() {
+                const speed = speedSlider.value * 100; // Convert to milliseconds
+                
+                if (animationInterval) {
+                    clearInterval(animationInterval);
+                }
+                
+                animationInterval = setInterval(function() {
+                    if (increasing) {
+                        currentIntensity += 1;
+                        if (currentIntensity >= 100) {
+                            currentIntensity = 100;
+                            increasing = false;
+                        }
+                    } else {
+                        currentIntensity -= 1;
+                        if (currentIntensity <= 0) {
+                            currentIntensity = 0;
+                            increasing = true;
+                        }
+                    }
+                    
+                    updatePurpleOverlay(currentIntensity);
+                }, speed);
+            }
+            
+            // Toggle animation on/off
+            function toggleAnimation() {
+                if (isAnimating) {
+                    clearInterval(animationInterval);
+                    toggleBtn.textContent = 'Resume Animation';
+                } else {
+                    startAnimation();
+                    toggleBtn.textContent = 'Pause Animation';
+                }
+                isAnimating = !isAnimating;
+            }
+            
+            // Reset animation
+            function resetAnimation() {
+                currentIntensity = 0;
+                increasing = true;
+                speedSlider.value = 5;
+                speedValue.textContent = '5s';
+                updatePurpleOverlay(currentIntensity);
+                
+                if (isAnimating) {
+                    startAnimation();
+                }
+            }
+            
+            // Update speed display and restart animation with new speed
+            speedSlider.addEventListener('input', function() {
+                speedValue.textContent = `${speedSlider.value}s`;
+                if (isAnimating) {
+                    startAnimation();
+                }
+            });
+            
+            // Check if video loads successfully
+            video.addEventListener('loadeddata', function() {
+                console.log('Video loaded successfully');
+                fallbackMessage.style.display = 'none';
+                
+                // Try to play the video on mobile
+                playVideo();
+            });
+            
+            video.addEventListener('error', function() {
+                console.log('Video failed to load');
+                fallbackMessage.style.display = 'block';
+                
+                // Apply a fallback background color
+                document.body.style.backgroundColor = '#1a1a1a';
+            });
+            
+            // Try again button functionality
+            tryAgainBtn.addEventListener('click', function() {
+                video.load();
+                fallbackMessage.style.display = 'none';
+            });
+            
+            // Mobile play button functionality
+            mobilePlayBtn.addEventListener('click', function() {
+                playVideo();
+                mobilePlayBtn.style.display = 'none';
+            });
+            
+            // Function to play video with error handling
+            function playVideo() {
+                const playPromise = video.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // Video started playing successfully
+                        console.log('Video is playing');
+                        mobilePlayBtn.style.display = 'none';
+                    }).catch(error => {
+                        // Video failed to play
+                        console.log('Video autoplay prevented: ', error);
+                        mobilePlayBtn.style.display = 'block';
+                    });
+                }
+            }
+            
+            // Check if user is on a mobile device
+            function isMobileDevice() {
+                return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+            }
+            
+            // Initialize animation
+            updatePurpleOverlay(currentIntensity);
+            startAnimation();
+            
+            // Show mobile play button if on mobile
+            if (isMobileDevice()) {
+                mobilePlayBtn.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
