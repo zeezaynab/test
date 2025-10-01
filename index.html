@@ -20,7 +20,6 @@
             color: white;
         }
 
-        /* iOS-compatible video container */
         .video-container {
             position: fixed;
             top: 0;
@@ -28,20 +27,19 @@
             width: 100%;
             height: 100%;
             z-index: -2;
-            overflow: hidden;
         }
 
         .video-container video {
-            width: 100%;
-            height: 100%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             object-fit: cover;
-            /* iOS-specific fixes */
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-perspective: 1000;
-            perspective: 1000;
+            filter: hue-rotate(180deg) saturate(1.2); /* Additional color adjustment */
         }
 
         /* Double overlay technique for stronger purple effect */
@@ -51,9 +49,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(140, 20, 220, 0.8);
+            background: rgba(140, 20, 220, 0.8); /* Strong purple */
             z-index: -1;
-            mix-blend-mode: color;
+            mix-blend-mode: color; /* Changes the hue */
         }
 
         .dark-overlay {
@@ -62,20 +60,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.6); /* Fixed at 60% darkness */
             z-index: 0;
-        }
-
-        /* Fallback background for when video doesn't load */
-        .fallback-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            z-index: -3;
-            display: none;
         }
 
         .navbar {
@@ -125,10 +111,10 @@
 
         .brand-name {
             color: white;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 300;
+            font-family: 'Montserrat', sans-serif; /* Changed to Montserrat */
+            font-weight: 300; /* Changed to lighter weight */
             letter-spacing: 3px;
-            font-size: 18px;
+            font-size: 18px; /* Slightly smaller */
             text-transform: uppercase;
         }
 
@@ -185,17 +171,35 @@
             padding: 20px;
             border-radius: 5px;
             max-width: 80%;
-            z-index: 20;
         }
 
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            .video-container {
-                display: none !important;
-            }
-            .fallback-background {
-                display: block !important;
-            }
+        /* Color adjustment controls - HIDDEN VISUALLY */
+        .color-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 100;
+            color: white;
+            font-size: 12px;
+            display: none; /* Hide the control box */
+        }
+
+        .color-controls h3 {
+            margin-bottom: 10px;
+        }
+
+        .slider-container {
+            margin: 8px 0;
+        }
+
+        /* Animation status display */
+        .animation-status {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #aaa;
         }
 
         /* Responsive adjustments */
@@ -259,26 +263,10 @@
     </style>
 </head>
 <body>
-    <!-- Fallback background for when video fails -->
-    <div class="fallback-background" id="fallbackBackground"></div>
-    
-    <!-- iOS-compatible Video Background -->
+    <!-- Video Background -->
     <div class="video-container">
-        <video 
-            id="background-video" 
-            autoplay 
-            muted 
-            loop 
-            playsinline 
-            preload="auto"
-            webkit-playsinline
-            x-webkit-airplay="deny"
-            disablePictureInPicture
-            poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" <!-- Transparent 1px gif as poster -->
-        >
+        <video id="background-video" autoplay muted loop playsinline>
             <source src="video.mp4" type="video/mp4">
-            <!-- Optional: Add WebM version for better Chrome performance -->
-            <!-- <source src="video.webm" type="video/webm"> -->
             Your browser does not support the video tag.
         </video>
         <div id="fallback-message" class="fallback-message">
@@ -317,92 +305,51 @@
         </div>
     </div>
 
+    <!-- Color adjustment controls - HIDDEN VISUALLY -->
+    <div class="color-controls">
+        <h3>Purple Animation Controls</h3>
+        <div class="slider-container">
+            <label>Animation Speed: <span id="speedValue">5s</span></label>
+            <input type="range" id="speedSlider" min="1" max="20" value="5">
+        </div>
+        <div class="animation-status">
+            Current Purple Intensity: <span id="currentPurple">50%</span>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="toggleAnimation()" id="toggleBtn">Pause Animation</button>
+            <button onclick="resetAnimation()" style="margin-left: 5px;">Reset</button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const video = document.getElementById('background-video');
             const fallbackMessage = document.getElementById('fallback-message');
-            const fallbackBackground = document.getElementById('fallbackBackground');
             const tryAgainBtn = document.getElementById('try-again-btn');
             const colorOverlay = document.getElementById('colorOverlay');
+            const speedSlider = document.getElementById('speedSlider');
+            const speedValue = document.getElementById('speedValue');
+            const currentPurple = document.getElementById('currentPurple');
+            const toggleBtn = document.getElementById('toggleBtn');
             
-            // iOS-specific video handling
-            function handleVideoPlayback() {
-                // Force video to play on iOS
-                video.play().then(() => {
-                    console.log('Video autoplay started successfully');
-                    fallbackMessage.style.display = 'none';
-                }).catch((error) => {
-                    console.log('Autoplay failed:', error);
-                    showFallback();
-                    
-                    // Try again with user interaction
-                    document.body.addEventListener('click', function tryPlayOnClick() {
-                        video.play().then(() => {
-                            console.log('Video started after user interaction');
-                            document.body.removeEventListener('click', tryPlayOnClick);
-                        });
-                    }, { once: true });
-                });
-            }
-            
-            function showFallback() {
-                fallbackMessage.style.display = 'block';
-                fallbackBackground.style.display = 'block';
-            }
-            
-            // Check if video loads successfully
-            video.addEventListener('loadeddata', function() {
-                console.log('Video loaded successfully');
-                fallbackMessage.style.display = 'none';
-            });
-            
-            video.addEventListener('error', function() {
-                console.log('Video failed to load');
-                showFallback();
-            });
-            
-            // iOS Safari specific event listeners
-            video.addEventListener('loadstart', function() {
-                console.log('Video load started');
-            });
-            
-            video.addEventListener('canplay', function() {
-                console.log('Video can play');
-                handleVideoPlayback();
-            });
-            
-            // Try again button functionality
-            tryAgainBtn.addEventListener('click', function() {
-                video.load();
-                fallbackMessage.style.display = 'none';
-                fallbackBackground.style.display = 'none';
-                setTimeout(handleVideoPlayback, 100);
-            });
-            
-            // Handle page visibility changes (for when tab becomes active)
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    video.play().catch(e => console.log('Resume play failed:', e));
-                }
-            });
-            
-            // Initialize
-            handleVideoPlayback();
-            
-            // Animation variables (your existing purple animation)
+            // Animation variables
             let animationInterval;
             let isAnimating = true;
             let currentIntensity = 0;
             let increasing = true;
             
+            // Set darkness to fixed 60%
+            document.querySelector('.dark-overlay').style.background = 'rgba(0, 0, 0, 0.6)';
+            
             // Update purple overlay
             function updatePurpleOverlay(intensity) {
                 colorOverlay.style.background = `rgba(140, 20, 220, ${intensity / 100})`;
+                currentPurple.textContent = `${Math.round(intensity)}%`;
             }
             
             // Start the animation
             function startAnimation() {
-                const speed = 5 * 100; // Fixed speed for simplicity
+                const speed = speedSlider.value * 100; // Convert to milliseconds
                 
                 if (animationInterval) {
                     clearInterval(animationInterval);
@@ -426,6 +373,66 @@
                     updatePurpleOverlay(currentIntensity);
                 }, speed);
             }
+            
+            // Toggle animation on/off
+            function toggleAnimation() {
+                if (isAnimating) {
+                    clearInterval(animationInterval);
+                    toggleBtn.textContent = 'Resume Animation';
+                } else {
+                    startAnimation();
+                    toggleBtn.textContent = 'Pause Animation';
+                }
+                isAnimating = !isAnimating;
+            }
+            
+            // Reset animation
+            function resetAnimation() {
+                currentIntensity = 0;
+                increasing = true;
+                speedSlider.value = 5;
+                speedValue.textContent = '5s';
+                updatePurpleOverlay(currentIntensity);
+                
+                if (isAnimating) {
+                    startAnimation();
+                }
+            }
+            
+            // Update speed display and restart animation with new speed
+            speedSlider.addEventListener('input', function() {
+                speedValue.textContent = `${speedSlider.value}s`;
+                if (isAnimating) {
+                    startAnimation();
+                }
+            });
+            
+            // Check if video loads successfully
+            video.addEventListener('loadeddata', function() {
+                console.log('Video loaded successfully');
+                fallbackMessage.style.display = 'none';
+            });
+            
+            video.addEventListener('error', function() {
+                console.log('Video failed to load');
+                fallbackMessage.style.display = 'block';
+                
+                // Apply a fallback background color
+                document.body.style.backgroundColor = '#1a1a1a';
+            });
+            
+            // Try again button functionality
+            tryAgainBtn.addEventListener('click', function() {
+                video.load();
+                fallbackMessage.style.display = 'none';
+            });
+            
+            // Ensure video plays correctly on mobile
+            video.addEventListener('loadedmetadata', function() {
+                video.play().catch(function(error) {
+                    console.log('Video autoplay prevented: ', error);
+                });
+            });
             
             // Initialize animation
             updatePurpleOverlay(currentIntensity);
