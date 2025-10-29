@@ -52,6 +52,19 @@
             background: rgba(140, 20, 220, 0.8); /* Strong purple */
             z-index: -1;
             mix-blend-mode: color; /* Changes the hue */
+            animation: purplePulse 6s ease-in-out infinite; /* Faster animation */
+        }
+
+        @keyframes purplePulse {
+            0% { 
+                background: rgba(100, 40, 180, 0.7); /* Start with purplish blue */
+            }
+            50% { 
+                background: rgba(140, 20, 220, 0.9); /* Peak purple */
+            }
+            100% { 
+                background: rgba(100, 40, 180, 0.7); /* Return to purplish blue */
+            }
         }
 
         .dark-overlay {
@@ -321,6 +334,29 @@
             color: #aaa;
         }
 
+        /* Animation speed controls - HIDDEN */
+        .speed-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 100;
+            color: white;
+            font-size: 12px;
+            display: none; /* HIDDEN */
+        }
+
+        .speed-controls h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .speed-slider-container {
+            margin: 8px 0;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .navbar {
@@ -460,19 +496,15 @@
         </div>
     </div>
 
-    <!-- Color adjustment controls - HIDDEN VISUALLY -->
-    <div class="color-controls">
-        <h3>Purple Animation Controls</h3>
-        <div class="slider-container">
-            <label>Animation Speed: <span id="speedValue">5s</span></label>
-            <input type="range" id="speedSlider" min="1" max="20" value="5">
-        </div>
-        <div class="animation-status">
-            Current Purple Intensity: <span id="currentPurple">50%</span>
+    <!-- Animation Speed Controls - HIDDEN -->
+    <div class="speed-controls">
+        <h3>Animation Speed</h3>
+        <div class="speed-slider-container">
+            <label>Speed: <span id="speedValue">6s</span></label>
+            <input type="range" id="speedSlider" min="2" max="15" value="6">
         </div>
         <div style="margin-top: 10px;">
-            <button onclick="toggleAnimation()" id="toggleBtn">Pause Animation</button>
-            <button onclick="resetAnimation()" style="margin-left: 5px;">Reset</button>
+            <button id="toggleBtn">Pause Animation</button>
         </div>
     </div>
 
@@ -484,7 +516,6 @@
             const colorOverlay = document.getElementById('colorOverlay');
             const speedSlider = document.getElementById('speedSlider');
             const speedValue = document.getElementById('speedValue');
-            const currentPurple = document.getElementById('currentPurple');
             const toggleBtn = document.getElementById('toggleBtn');
             const subscribeBtn = document.getElementById('subscribe-btn');
             const subscribeModal = document.getElementById('subscribe-modal');
@@ -494,70 +525,28 @@
             const successMessage = document.getElementById('success-message');
             
             // Animation variables
-            let animationInterval;
             let isAnimating = true;
-            let currentIntensity = 0;
-            let increasing = true;
+            let currentSpeed = 6; // Default speed in seconds
             
             // Set darkness to fixed 60%
             document.querySelector('.dark-overlay').style.background = 'rgba(0, 0, 0, 0.6)';
             
-            // Update purple overlay
-            function updatePurpleOverlay(intensity) {
-                colorOverlay.style.background = `rgba(140, 20, 220, ${intensity / 100})`;
-                currentPurple.textContent = `${Math.round(intensity)}%`;
-            }
-            
-            // Start the animation
-            function startAnimation() {
-                const speed = speedSlider.value * 100; // Convert to milliseconds
-                
-                if (animationInterval) {
-                    clearInterval(animationInterval);
-                }
-                
-                animationInterval = setInterval(function() {
-                    if (increasing) {
-                        currentIntensity += 1;
-                        if (currentIntensity >= 100) {
-                            currentIntensity = 100;
-                            increasing = false;
-                        }
-                    } else {
-                        currentIntensity -= 1;
-                        if (currentIntensity <= 0) {
-                            currentIntensity = 0;
-                            increasing = true;
-                        }
-                    }
-                    
-                    updatePurpleOverlay(currentIntensity);
-                }, speed);
+            // Update animation speed
+            function updateAnimationSpeed(speed) {
+                colorOverlay.style.animationDuration = `${speed}s`;
+                speedValue.textContent = `${speed}s`;
             }
             
             // Toggle animation on/off
             function toggleAnimation() {
                 if (isAnimating) {
-                    clearInterval(animationInterval);
+                    colorOverlay.style.animationPlayState = 'paused';
                     toggleBtn.textContent = 'Resume Animation';
                 } else {
-                    startAnimation();
+                    colorOverlay.style.animationPlayState = 'running';
                     toggleBtn.textContent = 'Pause Animation';
                 }
                 isAnimating = !isAnimating;
-            }
-            
-            // Reset animation
-            function resetAnimation() {
-                currentIntensity = 0;
-                increasing = true;
-                speedSlider.value = 5;
-                speedValue.textContent = '5s';
-                updatePurpleOverlay(currentIntensity);
-                
-                if (isAnimating) {
-                    startAnimation();
-                }
             }
             
             // Modal functionality
@@ -620,11 +609,12 @@
             
             // Update speed display and restart animation with new speed
             speedSlider.addEventListener('input', function() {
-                speedValue.textContent = `${speedSlider.value}s`;
-                if (isAnimating) {
-                    startAnimation();
-                }
+                currentSpeed = speedSlider.value;
+                updateAnimationSpeed(currentSpeed);
             });
+            
+            // Toggle animation button
+            toggleBtn.addEventListener('click', toggleAnimation);
             
             // Check if video loads successfully
             video.addEventListener('loadeddata', function() {
@@ -654,11 +644,9 @@
             });
             
             // Initialize animation
-            updatePurpleOverlay(currentIntensity);
-            startAnimation();
+            updateAnimationSpeed(currentSpeed);
         });
     </script>
 </body>
 </html>
-
 
