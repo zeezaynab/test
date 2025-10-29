@@ -16,7 +16,7 @@
         body, html {
             height: 100%;
             font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
             color: white;
         }
 
@@ -92,6 +92,7 @@
             padding-bottom: 5px;
             position: relative;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .nav-button::after {
@@ -111,11 +112,11 @@
 
         .brand-name {
             color: white;
-            font-family: 'Montserrat', sans-serif; /* Changed to Montserrat */
-            font-weight: 300; /* Changed to lighter weight */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700; /* Changed to bold */
             letter-spacing: 3px;
-            font-size: 18px; /* Slightly smaller */
-            text-transform: uppercase;
+            font-size: 18px;
+            text-transform: lowercase; /* Changed to lowercase */
         }
 
         .container {
@@ -157,6 +158,124 @@
             letter-spacing: 4px;
             margin-top: 10px;
             text-transform: uppercase;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: rgba(0, 0, 0, 0.7); /* More translucent */
+            padding: 40px;
+            border-radius: 20px; /* Rounded corners */
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px); /* Adds blur effect for more translucency */
+        }
+
+        .modal-heading {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .form-group {
+            width: 100%;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px; /* Rounded corners */
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .submit-btn {
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px; /* Rounded corners */
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .success-message {
+            display: none;
+            color: white;
+            margin-top: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
         }
 
         /* Fallback message styling */
@@ -230,6 +349,16 @@
                 font-size: 14px;
                 letter-spacing: 4px;
             }
+            
+            .modal-heading {
+                font-size: 20px;
+                letter-spacing: 3px;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+                border-radius: 15px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -258,6 +387,16 @@
             .top-caption, .bottom-caption {
                 font-size: 12px;
                 letter-spacing: 3px;
+            }
+            
+            .modal-heading {
+                font-size: 18px;
+                letter-spacing: 2px;
+            }
+            
+            .modal-content {
+                padding: 25px 15px;
+                border-radius: 12px;
             }
         }
     </style>
@@ -289,7 +428,7 @@
     <nav class="navbar">
         <div class="nav-left">
             <a href="#" class="nav-button">Home</a>
-            <a href="#" class="nav-button">Subscribe</a>
+            <div class="nav-button" id="subscribe-btn">Subscribe</div>
         </div>
         <div class="nav-right">
             <div class="brand-name"><b>thirdwatch</b></div>
@@ -302,6 +441,22 @@
             <div class="top-caption">Our new website is</div>
             <div class="main-headline">Coming Soon</div>
             <div class="bottom-caption">Stay Tuned</div>
+        </div>
+    </div>
+
+    <!-- Subscribe Modal -->
+    <div class="modal-overlay" id="subscribe-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="close-modal">&times;</button>
+            <h2 class="modal-heading">Stay Updated</h2>
+            <p class="modal-text">Enter your email below to be notified when we go live!</p>
+            <form class="modal-form" id="subscribe-form">
+                <div class="form-group">
+                    <input type="email" class="form-input" id="email-input" placeholder="Enter your email" required>
+                </div>
+                <button type="submit" class="submit-btn">Submit</button>
+                <div class="success-message" id="success-message">Thank you! We'll notify you when we launch.</div>
+            </form>
         </div>
     </div>
 
@@ -331,6 +486,12 @@
             const speedValue = document.getElementById('speedValue');
             const currentPurple = document.getElementById('currentPurple');
             const toggleBtn = document.getElementById('toggleBtn');
+            const subscribeBtn = document.getElementById('subscribe-btn');
+            const subscribeModal = document.getElementById('subscribe-modal');
+            const closeModal = document.getElementById('close-modal');
+            const subscribeForm = document.getElementById('subscribe-form');
+            const emailInput = document.getElementById('email-input');
+            const successMessage = document.getElementById('success-message');
             
             // Animation variables
             let animationInterval;
@@ -399,6 +560,64 @@
                 }
             }
             
+            // Modal functionality
+            subscribeBtn.addEventListener('click', function() {
+                subscribeModal.style.display = 'flex';
+                // Reset form when opening modal
+                subscribeForm.reset();
+                successMessage.style.display = 'none';
+            });
+            
+            closeModal.addEventListener('click', function() {
+                subscribeModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside the content
+            subscribeModal.addEventListener('click', function(e) {
+                if (e.target === subscribeModal) {
+                    subscribeModal.style.display = 'none';
+                }
+            });
+            
+            // Form submission handler
+            subscribeForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+                
+                const email = emailInput.value;
+                
+                // Submit to Google Form using fetch API
+                const formData = new FormData();
+                // IMPORTANT: Replace this with the actual entry ID from your Google Form
+                formData.append('entry.123456789', email);
+                
+                fetch('https://docs.google.com/forms/d/e/1FAIpQLSdWZk3FWy7xyxrrxBrQQwD5vQHscr85uf_FoiApIV4dI0qhLA/formResponse', {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors'
+                })
+                .then(() => {
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    emailInput.value = '';
+                    
+                    // Close modal after 2 seconds
+                    setTimeout(function() {
+                        subscribeModal.style.display = 'none';
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    // Still show success message for better UX
+                    successMessage.style.display = 'block';
+                    emailInput.value = '';
+                    
+                    // Close modal after 2 seconds
+                    setTimeout(function() {
+                        subscribeModal.style.display = 'none';
+                    }, 2000);
+                });
+            });
+            
             // Update speed display and restart animation with new speed
             speedSlider.addEventListener('input', function() {
                 speedValue.textContent = `${speedSlider.value}s`;
@@ -441,4 +660,5 @@
     </script>
 </body>
 </html>
+
 
